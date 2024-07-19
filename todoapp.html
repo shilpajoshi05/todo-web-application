@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo App</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        width: 300px;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    form {
+        display: flex;
+        margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+        flex: 1;
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    li {
+        padding: 8px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    li:last-child {
+        border-bottom: none;
+    }
+
+    .completed {
+        text-decoration: line-through;
+        opacity: 0.5;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Todo List</h1>
+    <form id="todo-form">
+        <input type="text" id="todo-input" placeholder="Enter a task...">
+        <button type="submit" id="add-btn">Add Todo</button>
+    </form>
+    <ul id="todo-list"></ul>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const todoForm = document.getElementById('todo-form');
+    const todoInput = document.getElementById('todo-input');
+    const todoList = document.getElementById('todo-list');
+    const addButton = document.getElementById('add-btn');
+
+    // Load todos from localStorage
+    let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+    // Function to render todos
+    function renderTodos() {
+        todoList.innerHTML = '';
+        todos.forEach(function(todo, index) {
+            const li = document.createElement('li');
+            li.innerText = todo.task;
+            if (todo.completed) {
+                li.classList.add('completed');
+            }
+            // Mark as completed or toggle completion
+            li.addEventListener('click', function() {
+                todo.completed = !todo.completed;
+                renderTodos();
+                saveTodos();
+            });
+            // Delete todo
+            li.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                todos = todos.filter(function(t, idx) {
+                    return idx !== index;
+                });
+                renderTodos();
+                saveTodos();
+            });
+            todoList.appendChild(li);
+        });
+    }
+
+    // Function to add a new todo
+    function addTodo() {
+        const task = todoInput.value.trim();
+        if (task !== '') {
+            todos.push({ task: task, completed: false });
+            renderTodos();
+            saveTodos();
+            todoInput.value = '';
+        }
+    }
+
+    // Event listener for form submission
+    todoForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        addTodo();
+    });
+
+    // Event listener for pressing Enter in input field
+    todoInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission
+            addTodo();
+        }
+    });
+
+    // Function to save todos to localStorage
+    function saveTodos() {
+        localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    // Initial render
+    renderTodos();
+});
+</script>
+
+</body>
+</html>
